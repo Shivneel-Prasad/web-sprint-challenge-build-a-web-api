@@ -1,7 +1,7 @@
 // Write your "actions" router here!
-const Actions = require('./actions-model')
 const express = require('express')
 const router = express.Router()
+const AM = require('./actions-model')
 
 router.get('/', (req, res, next) => {
     
