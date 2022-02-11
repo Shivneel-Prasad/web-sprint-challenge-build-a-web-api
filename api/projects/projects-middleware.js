@@ -1,45 +1,35 @@
 // add middlewares here related to projects
 const Projects = require('./projects-model')
 
-async function validateProjectId (req, res, next) {
-    try {
-        const { id } = req.params
-        const project = await Projects.get(id)
-        if(project) {
-            req.params = project
-            next()
-        } else {
-            res.status(404).json({
-                status: 404,
-                message: `Unable to find Project by id: ${id}`,
-            })
-        }
-    } catch (err) {
-        next(err)
-    }
+function validateProjectId(req, res, next){
+    const { id } = req.params
+    Projects.get(id)
+        .then(program => {
+            if(program) {
+                req.params = program
+                next()
+            } else {
+                res.status(404).json({
+                    status: 404,
+                    message: `Unable to find existing projects by id: ${id}`,
+                })
+            }
+        })
+        .catch(next)
 }
 
-async function verifyProject(req, res, next) {
-    try {
-        const { name, description, completed } = req.body
-        if (!name || !name.trim()) {
-            res.status(400).json({
-                status: 400,
-                message: 'Name field is required'
-            })
-        } else if (!description || !description.trim()) {
-            res.status(400).json({
-                status: 400,
-                message: 'Description field is required'
-            })
-        } else {
-            req.name = name.trim()
-            req.description = description.trim()
-            req.completed = completed
-            next()
-        }
-    } catch (err) {
-        next(err)
+function verifyProject(req,res,next) {
+    const { name, description, completed } = req.body
+    if (!name || !description) {
+        res.status(400).json({
+            status: 400,
+            message: 'name and description is required'
+        })
+    } else {
+        req.name = name.trim()
+        req.description = description.trim()
+        req.completed = completed
+        next()
     }
 }
 

@@ -32,34 +32,42 @@ router.get('/:id', validateProjectId, async (req, res, next) => {
 })
 
 //[POST]
-router.post('/', verifyProject, (req, res, next) => {
-    PM.insert(req.body)
-        .then(project => {
-            res.status(201).json(project)
+router.post('/', verifyProject, async (req, res, next) => {
+    try {
+        const body = req.body
+        const addData = await PM.insert(body)
+        if(addData) {
+            res.status(201).json(addData)
+        } else {
+            res.status(404).json({
+                status: 404,
+                message: 'Unable to find name and description'
+            })
+        }
+    } catch (err) {
+        next(err)
+    }
+})
+
+//[PUT]
+router.put('/:id', validateProjectId, verifyProject, (req, res, next) => {
+    const { id } = req.params
+    const body = req.body
+    PM.update(id, body)
+        .then(reformProject => {
+            res.status(400).json(reformProject)
         })
         .catch(next)
 })
 
-//[PUT]
-router.put('/:id', validateProjectId, verifyProject, async (req, res, next) => {
-    try {
-        const { id } = req.params
-        const reviseInfo = await PM.update(id, req.body)
-            res.status(400).json(reviseInfo)
-    } catch (err) {
-        next(err)
-    }
-})
-
 //[DELETE]
-router.delete('/:id', validateProjectId, async (req, res, next) => {
-    try {
-        const { id } = req.params
-        const removeData = await PM.remove(id)
-          res.status(200).json(removeData)
-    } catch (err) {
-        next(err)
-    }
+router.delete('/:id', validateProjectId, (req, res, next) => {
+    const { id } = req.params
+    PM.remove(id)
+        .then(rmProject => {
+            res.status(200).json(rmProject)
+        })
+        .catch(next)
 })
 
 //[GET-ACTIONS]
